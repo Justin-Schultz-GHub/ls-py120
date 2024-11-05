@@ -259,57 +259,247 @@
 # print(f"{bholmes.name} has {bholmes.number_of_pets()} "
 #       "adopted pets.")
 
-# Refactoring Vehicles
-class Vehicle:
-    def __init__(self, make, model):
-        self.make = make
-        self.model = model
 
-    def info(self):
-        return f"{self.make} {self.model}"
+# # Refactoring Vehicles
+# class Vehicle:
+#     def __init__(self, make, model):
+#         self.make = make
+#         self.model = model
 
-    def get_wheels(self):
-        return 4
+#     def info(self):
+#         return f"{self.make} {self.model}"
 
-
-class Car(Vehicle):
-    pass
+#     def get_wheels(self):
+#         return 4
 
 
-class Motorcycle(Vehicle):
-    def get_wheels(self):
-        return 2
+# class Car(Vehicle):
+#     pass
 
 
-class Truck(Vehicle):
-    def __init__(self, make, model, payload):
-        super().__init__(make, model)
-        self.payload = payload
-
-    def get_wheels(self):
-        return 6
-
-class Quad(Vehicle):
-    pass
+# class Motorcycle(Vehicle):
+#     def get_wheels(self):
+#         return 2
 
 
-car = Car("Honda", "Accord")
-motorcycle = Motorcycle("Kawasaki", "Ninja")
-truck = Truck("Dodge", "Mammoth", 2300)
-quad = Quad("Polaris", "Sportsman 850")
+# class Truck(Vehicle):
+#     def __init__(self, make, model, payload):
+#         super().__init__(make, model)
+#         self.payload = payload
 
-vehicles = [car, motorcycle, truck, quad]
-methods = ["make", "model", "get_wheels", "payload"]
+#     def get_wheels(self):
+#         return 6
 
-for vehicle in vehicles:
-    for method in methods:
-        if method == "get_wheels":
-                print(getattr(vehicle, method)())
-        else:
-            try:
-                print(getattr(vehicle, method))
+# class Quad(Vehicle):
+#     pass
 
-            except AttributeError:
-                pass
 
-    print()
+# car = Car("Honda", "Accord")
+# motorcycle = Motorcycle("Kawasaki", "Ninja")
+# truck = Truck("Dodge", "Mammoth", 2300)
+# quad = Quad("Polaris", "Sportsman 850")
+
+# vehicles = [car, motorcycle, truck, quad]
+# methods = ["make", "model", "get_wheels", "payload"]
+
+# for vehicle in vehicles:
+#     for method in methods:
+#         if method == "get_wheels":
+#                 print(getattr(vehicle, method)())
+#         else:
+#             try:
+#                 print(getattr(vehicle, method))
+
+#             except AttributeError:
+#                 pass
+
+#     print()
+
+
+# # Moving
+# class WalkMixIn:
+#     def walk(self):
+#         return f'{self.name} {self.gait()} forward'
+
+# class Person(WalkMixIn):
+#     def __init__(self, name):
+#         self.name = name
+
+#     def gait(self):
+#         return "strolls"
+
+# class Cat(WalkMixIn):
+#     def __init__(self, name):
+#         self.name = name
+
+#     def gait(self):
+#         return "saunters"
+
+# class Cheetah(WalkMixIn):
+#     def __init__(self, name):
+#         self.name = name
+
+#     def gait(self):
+#         return "runs"
+
+
+# mike = Person("Mike")
+# print(mike.walk())  # Expected: "Mike strolls forward"
+
+# kitty = Cat("Kitty")
+# print(kitty.walk())  # Expected: "Kitty saunters forward"
+
+# flash = Cheetah("Flash")
+# print(flash.walk())  # Expected: "Flash runs forward"
+
+
+# # Nobility
+# class WalkMixIn:
+#     def walk(self):
+#         return f'{self} {self.gait()} forward'
+
+# class Person(WalkMixIn):
+#     def __init__(self, name):
+#         self.name = name
+
+#     def gait(self):
+#         return "strolls"
+
+#     def __str__(self):
+#         return self.name
+
+# class Cat(WalkMixIn):
+#     def __init__(self, name):
+#         self.name = name
+
+#     def gait(self):
+#         return "saunters"
+
+#     def __str__(self):
+#         return self.name
+
+# class Cheetah(WalkMixIn):
+#     def __init__(self, name):
+#         self.name = name
+
+#     def gait(self):
+#         return "runs"
+
+#     def __str__(self):
+#         return self.name
+
+# class Noble(WalkMixIn):
+#     def __init__(self, name, title):
+#         self.name = name
+#         self.title = title
+
+#     def gait(self):
+#         return "struts"
+
+#     def __str__(self):
+#         return f'{self.title} {self.name}'
+
+# mike = Person("Mike")
+# print(mike.walk())  # Expected: "Mike strolls forward"
+
+# kitty = Cat("Kitty")
+# print(kitty.walk())  # Expected: "Kitty saunters forward"
+
+# flash = Cheetah("Flash")
+# print(flash.walk())  # Expected: "Flash runs forward"
+
+# byron = Noble("Byron", "Lord")
+# print(byron.walk())  # "Lord Byron struts forward"
+# print(byron.name)    # "Byron"
+# print(byron.title)   # "Lord"
+
+
+# # Complete the Program - Houses!
+# class House:
+#     def __init__(self, price):
+#         self._price = price
+
+#     @property
+#     def price(self):
+#         return self._price
+
+#     @price.setter
+#     def price(self, value):
+#         self._price = value
+
+#     def __gt__(self, other):
+#         if isinstance(other, House):
+#             return self._price > other._price
+
+#         return NotImplemented
+
+#     def __lt__(self, other):
+#         if isinstance(other, House):
+#             return self._price < other._price
+
+#         return NotImplemented
+
+# home1 = House(100000)
+# home2 = House(150000)
+# if home1 < home2:
+#     print("Home 1 is cheaper")
+# if home2 > home1:
+#     print("Home 2 is more expensive")
+
+
+# # Wallet (Part 1)
+# class Wallet:
+
+#     def __init__(self, amount):
+#         self.amount = amount
+
+#     def __add__(self, other):
+#         if isinstance(other, Wallet):
+#             return Wallet(self.amount + other.amount)
+
+#         return NotImplemented
+
+# wallet1 = Wallet(50)
+# wallet2 = Wallet(30)
+# merged_wallet = wallet1 + wallet2
+# print(merged_wallet.amount == 80)       # True
+
+
+# # Wallet (Part 2)
+# class Wallet:
+
+#     def __init__(self, amount):
+#         self.amount = amount
+
+#     def __add__(self, other):
+#         if isinstance(other, Wallet):
+#             return Wallet(self.amount + other.amount)
+
+#         return NotImplemented
+
+#     def __str__(self):
+#         return f'Wallet with ${self.amount}.'
+
+
+# wallet1 = Wallet(50)
+# wallet2 = Wallet(30)
+# merged_wallet = wallet1 + wallet2
+# print(merged_wallet)          # Wallet with $80.
+
+
+# # Reverse Engineering
+# class Transform:
+#     def __init__(self, chars):
+#         self.chars = chars
+
+#     def uppercase(self):
+#         return self.chars.upper()
+
+#     @classmethod
+#     def lowercase(cls, chars):
+#         return chars.lower()
+
+# my_data = Transform('abc')
+# print(my_data.uppercase())              # ABC
+# print(Transform.lowercase('XYZ'))       # xyz
+
