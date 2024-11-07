@@ -76,8 +76,8 @@
 # print(buffer.buffer)
 
 
-# Number Guesser Part 1
-# First iteration
+# # Number Guesser Part 1
+# # First iteration
 # import random
 # class GuessingGame:
 #     def play(self):
@@ -151,28 +151,123 @@
 # game = GuessingGame()
 # game.play()
 
-# ChatGPT recommendations implemented (some)
+# # ChatGPT recommendations implemented (some)
+# import random
+# class GuessingGame:
+#     MESSAGES = {
+#         'win': 'That\'s the number! You win!',
+#         'loss': 'You\'re out of guesses!\nThe number was {number}!',
+#         'high': 'Your guess is too high!',
+#         'low': 'Your guess is too low!',
+#         'input_prompt': 'Enter a number from 1 to 100 (including 100): ',
+#         'out_of_range': 'Invalid guess: Must be between 1 and 100',
+#         'not_a_number': 'Invalid guess: Must be a number',
+#         'remaining_guesses': 'You have {guesses} guesses remaining.',
+
+#     }
+
+#     def play(self):
+#         rand_num = random.randint(1, 100)
+#         guesses = 7
+
+#         while guesses:
+#             self.guesses_remaining(guesses)
+#             guess = self.get_guess()
+#             result = self.check_guess(guess, rand_num)
+
+#             if result == 'Winner':
+#                 self.announce_win()
+#                 break
+#             else:
+#                 self.announce_result(result)
+#                 guesses -= 1
+
+#         else:
+#             self.announce_loss(rand_num)
+
+#     def guesses_remaining(self, guesses):
+#         print(self.MESSAGES['remaining_guesses'].format(guesses=guesses))
+
+#     def get_guess(self):
+#         guess = None
+
+#         while guess is None:
+#             user_input = input(f"{self.MESSAGES['input_prompt']}")
+#             guess = self.valid_guess(user_input)
+
+#         return guess
+
+#     def valid_guess(self, guess):
+#         try:
+#             guess = int(guess)
+#         except ValueError:
+#             print(f"{self.MESSAGES['not_a_number']}")
+#             return None
+
+#         if 1 <= guess <= 100:
+#             return guess
+#         else:
+#             print(f"{self.MESSAGES['out_of_range']}")
+#             return None
+
+#     def check_guess(self, guess, rand_num):
+#         if guess == rand_num:
+#             return 'Winner'
+#         elif guess > rand_num:
+#             return 'High'
+#         else:
+#             return 'Low'
+
+#     def announce_win(self):
+#         print(self.MESSAGES['win'])
+
+#     def announce_result(self, result):
+#         if result == 'High':
+#             print(self.MESSAGES['high'])
+#         elif result == 'Low':
+#             print(self.MESSAGES['low'])
+#         print('')
+
+#     def announce_loss(self, number):
+#         print(self.MESSAGES['loss'].format(number=number))
+
+
+# game = GuessingGame()
+# game.play()
+
+
+# Number Guesser Part 2
 import random
+import math
+
 class GuessingGame:
     MESSAGES = {
         'win': 'That\'s the number! You win!',
         'loss': 'You\'re out of guesses!\nThe number was {number}!',
         'high': 'Your guess is too high!',
         'low': 'Your guess is too low!',
-        'input_prompt': 'Enter a number from 1 to 100 (including 100): ',
-        'out_of_range': 'Invalid guess: Must be between 1 and 100',
+        'input_prompt': (
+            'Enter a number from {low} to {high} (including {high}): '
+            ),
+        'out_of_range': 'Invalid guess: Must be between {low} and {high}',
         'not_a_number': 'Invalid guess: Must be a number',
+        'high_is_low': (
+            'Invalid maximum (must be higher than the minimum ({minimum}))'
+            ),
         'remaining_guesses': 'You have {guesses} guesses remaining.',
+        'enter_min': 'Enter a minimum value: ',
+        'enter_max': 'Enter a maximum value: ',
 
     }
 
     def play(self):
-        rand_num = random.randint(1, 100)
-        guesses = 7
+        low, high = self.get_range()
+        rand_num = random.randint(low, high)
+        guesses = int(math.log2(high - low + 1)) + 1
 
         while guesses:
             self.guesses_remaining(guesses)
-            guess = self.get_guess()
+            guess = self.get_guess(low, high)
             result = self.check_guess(guess, rand_num)
 
             if result == 'Winner':
@@ -185,29 +280,70 @@ class GuessingGame:
         else:
             self.announce_loss(rand_num)
 
+    def get_range(self):
+        low = None
+
+        while low is None:
+            low = input(self.MESSAGES['enter_min'])
+            low = self.valid_min_value(low)
+
+        high = None
+
+        while high is None:
+            high = input(self.MESSAGES['enter_max'])
+            high = self.valid_max_value(low, high)
+
+        return low, high
+
+    def valid_min_value(self, value):
+        try:
+            int(value)
+        except ValueError:
+            print(f"{self.MESSAGES['not_a_number']}")
+            return None
+
+        return int(value)
+
+    def valid_max_value(self, value, high):
+        try:
+            int(high)
+        except ValueError:
+            print(f"{self.MESSAGES['not_a_number']}")
+            return None
+
+        if int(high) <= value:
+            print(f"{self.MESSAGES['high_is_low'].format(minimum=value)}")
+            return None
+
+        return int(high)
+
     def guesses_remaining(self, guesses):
         print(self.MESSAGES['remaining_guesses'].format(guesses=guesses))
 
-    def get_guess(self):
+    def get_guess(self, low, high):
         guess = None
 
         while guess is None:
-            user_input = input(f"{self.MESSAGES['input_prompt']}")
-            guess = self.valid_guess(user_input)
+            user_input = input(
+                f"{self.MESSAGES['input_prompt'].format(low=low, high=high)}"
+                )
+            guess = self.valid_guess(user_input, low, high)
 
         return guess
 
-    def valid_guess(self, guess):
+    def valid_guess(self, guess, low, high):
         try:
             guess = int(guess)
         except ValueError:
             print(f"{self.MESSAGES['not_a_number']}")
             return None
 
-        if 1 <= guess <= 100:
+        if low <= guess <= high:
             return guess
         else:
-            print(f"{self.MESSAGES['out_of_range']}")
+            print(
+                f"{self.MESSAGES['out_of_range'].format(low=low, high=high)}"
+                )
             return None
 
     def check_guess(self, guess, rand_num):
@@ -219,7 +355,7 @@ class GuessingGame:
             return 'Low'
 
     def announce_win(self):
-        print({self.MESSAGES['win']})
+        print(self.MESSAGES['win'])
 
     def announce_result(self, result):
         if result == 'High':
