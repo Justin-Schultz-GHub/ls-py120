@@ -236,137 +236,223 @@
 # game.play()
 
 
-# Number Guesser Part 2
-import random
-import math
+# # Number Guesser Part 2
+# import random
+# import math
 
-class GuessingGame:
-    MESSAGES = {
-        'win': 'That\'s the number! You win!',
-        'loss': 'You\'re out of guesses!\nThe number was {number}!',
-        'high': 'Your guess is too high!',
-        'low': 'Your guess is too low!',
-        'input_prompt': (
-            'Enter a number from {low} to {high} (including {high}): '
-            ),
-        'out_of_range': 'Invalid guess: Must be between {low} and {high}',
-        'not_a_number': 'Invalid guess: Must be a number',
-        'high_is_low': (
-            'Invalid maximum (must be higher than the minimum ({minimum}))'
-            ),
-        'remaining_guesses': 'You have {guesses} guesses remaining.',
-        'enter_min': 'Enter a minimum value: ',
-        'enter_max': 'Enter a maximum value: ',
+# class GuessingGame:
+#     MESSAGES = {
+#         'win': 'That\'s the number! You win!',
+#         'loss': 'You\'re out of guesses!\nThe number was {number}!',
+#         'high': 'Your guess is too high!',
+#         'low': 'Your guess is too low!',
+#         'input_prompt': (
+#             'Enter a number from {low} to {high} (including {high}): '
+#             ),
+#         'out_of_range': 'Invalid guess: Must be between {low} and {high}',
+#         'not_a_number': 'Invalid guess: Must be a number',
+#         'high_is_low': (
+#             'Invalid maximum (must be higher than the minimum ({minimum}))'
+#             ),
+#         'remaining_guesses': 'You have {guesses} guesses remaining.',
+#         'enter_min': 'Enter a minimum value: ',
+#         'enter_max': 'Enter a maximum value: ',
 
-    }
+#     }
 
-    def play(self):
-        low, high = self.get_range()
-        rand_num = random.randint(low, high)
-        guesses = int(math.log2(high - low + 1)) + 1
+#     def play(self):
+#         low, high = self.get_range()
+#         rand_num = random.randint(low, high)
+#         guesses = int(math.log2(high - low + 1)) + 1
 
-        while guesses:
-            self.guesses_remaining(guesses)
-            guess = self.get_guess(low, high)
-            result = self.check_guess(guess, rand_num)
+#         while guesses:
+#             self.guesses_remaining(guesses)
+#             guess = self.get_guess(low, high)
+#             result = self.check_guess(guess, rand_num)
 
-            if result == 'Winner':
-                self.announce_win()
-                break
-            else:
-                self.announce_result(result)
-                guesses -= 1
+#             if result == 'Winner':
+#                 self.announce_win()
+#                 break
+#             else:
+#                 self.announce_result(result)
+#                 guesses -= 1
 
-        else:
-            self.announce_loss(rand_num)
+#         else:
+#             self.announce_loss(rand_num)
 
-    def get_range(self):
-        low = None
+#     def get_range(self):
+#         low = None
 
-        while low is None:
-            low = input(self.MESSAGES['enter_min'])
-            low = self.valid_min_value(low)
+#         while low is None:
+#             low = input(self.MESSAGES['enter_min'])
+#             low = self.valid_min_value(low)
 
-        high = None
+#         high = None
 
-        while high is None:
-            high = input(self.MESSAGES['enter_max'])
-            high = self.valid_max_value(low, high)
+#         while high is None:
+#             high = input(self.MESSAGES['enter_max'])
+#             high = self.valid_max_value(low, high)
 
-        return low, high
+#         return low, high
 
-    def valid_min_value(self, value):
-        try:
-            int(value)
-        except ValueError:
-            print(f"{self.MESSAGES['not_a_number']}")
-            return None
+#     def valid_min_value(self, value):
+#         try:
+#             int(value)
+#         except ValueError:
+#             print(f"{self.MESSAGES['not_a_number']}")
+#             return None
 
-        return int(value)
+#         return int(value)
 
-    def valid_max_value(self, value, high):
-        try:
-            int(high)
-        except ValueError:
-            print(f"{self.MESSAGES['not_a_number']}")
-            return None
+#     def valid_max_value(self, value, high):
+#         try:
+#             int(high)
+#         except ValueError:
+#             print(f"{self.MESSAGES['not_a_number']}")
+#             return None
 
-        if int(high) <= value:
-            print(f"{self.MESSAGES['high_is_low'].format(minimum=value)}")
-            return None
+#         if int(high) <= value:
+#             print(f"{self.MESSAGES['high_is_low'].format(minimum=value)}")
+#             return None
 
-        return int(high)
+#         return int(high)
 
-    def guesses_remaining(self, guesses):
-        print(self.MESSAGES['remaining_guesses'].format(guesses=guesses))
+#     def guesses_remaining(self, guesses):
+#         print(self.MESSAGES['remaining_guesses'].format(guesses=guesses))
 
-    def get_guess(self, low, high):
-        guess = None
+#     def get_guess(self, low, high):
+#         guess = None
 
-        while guess is None:
-            user_input = input(
-                f"{self.MESSAGES['input_prompt'].format(low=low, high=high)}"
-                )
-            guess = self.valid_guess(user_input, low, high)
+#         while guess is None:
+#             user_input = input(
+#                 f"{self.MESSAGES['input_prompt'].format(low=low, high=high)}"
+#                 )
+#             guess = self.valid_guess(user_input, low, high)
 
-        return guess
+#         return guess
 
-    def valid_guess(self, guess, low, high):
-        try:
-            guess = int(guess)
-        except ValueError:
-            print(f"{self.MESSAGES['not_a_number']}")
-            return None
+#     def valid_guess(self, guess, low, high):
+#         try:
+#             guess = int(guess)
+#         except ValueError:
+#             print(f"{self.MESSAGES['not_a_number']}")
+#             return None
 
-        if low <= guess <= high:
-            return guess
-        else:
-            print(
-                f"{self.MESSAGES['out_of_range'].format(low=low, high=high)}"
-                )
-            return None
+#         if low <= guess <= high:
+#             return guess
+#         else:
+#             print(
+#                 f"{self.MESSAGES['out_of_range'].format(low=low, high=high)}"
+#                 )
+#             return None
 
-    def check_guess(self, guess, rand_num):
-        if guess == rand_num:
-            return 'Winner'
-        elif guess > rand_num:
-            return 'High'
-        else:
-            return 'Low'
+#     def check_guess(self, guess, rand_num):
+#         if guess == rand_num:
+#             return 'Winner'
+#         elif guess > rand_num:
+#             return 'High'
+#         else:
+#             return 'Low'
 
-    def announce_win(self):
-        print(self.MESSAGES['win'])
+#     def announce_win(self):
+#         print(self.MESSAGES['win'])
 
-    def announce_result(self, result):
-        if result == 'High':
-            print(self.MESSAGES['high'])
-        elif result == 'Low':
-            print(self.MESSAGES['low'])
-        print('')
+#     def announce_result(self, result):
+#         if result == 'High':
+#             print(self.MESSAGES['high'])
+#         elif result == 'Low':
+#             print(self.MESSAGES['low'])
+#         print('')
 
-    def announce_loss(self, number):
-        print(self.MESSAGES['loss'].format(number=number))
+#     def announce_loss(self, number):
+#         print(self.MESSAGES['loss'].format(number=number))
 
 
-game = GuessingGame()
-game.play()
+# game = GuessingGame()
+# game.play()
+
+
+# Highest and Lowest Ranking Cards
+# class Card:
+#     RANKS = [*range(2, 11), 'Jack', 'Queen', 'King', 'Ace']
+#     RANK_RANKS = {rank: num for num, rank in enumerate(RANKS)}
+
+#     def __init__(self, rank, suit):
+#         self.rank = rank
+#         self.suit = suit
+
+#     def __str__(self):
+#         return f'{self.rank} of {self.suit}'
+
+#     def __lt__(self, other):
+#         return self.RANK_RANKS[self.rank] < other.RANK_RANKS[other.rank]
+
+#     def __eq__(self, other):
+#         return str(self) == str(other)
+
+
+# Further exploration
+class Card:
+    RANKS = [*range(2, 11), 'Jack', 'Queen', 'King', 'Ace']
+    RANK_RANKS = {rank: num for num, rank in enumerate(RANKS)}
+    SUITS = ['Diamonds', 'Clubs', 'Hearts', 'Spades']
+    SUIT_RANKS = {suit: num for num, suit in enumerate(SUITS)}
+
+    def __init__(self, rank, suit):
+        self.rank = rank
+        self.suit = suit
+
+    def __str__(self):
+        return f'{self.rank} of {self.suit}'
+
+    def __lt__(self, other):
+        if self.RANK_RANKS[self.rank] == other.RANK_RANKS[other.rank]:
+            return self.SUIT_RANKS[self.suit] < other.SUIT_RANKS[other.suit]
+
+        return self.RANK_RANKS[self.rank] < other.RANK_RANKS[other.rank]
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+cards = [Card('Ace', 'Spades'),
+        Card('Ace', 'Clubs'),
+        Card('Ace', 'Diamonds')]
+print(min(cards) == Card('Ace', 'Diamonds'))    # True
+print(max(cards) == Card('Ace', 'Spades'))      # True
+print(str(min(cards)) == "Ace of Diamonds")     # True
+print(str(max(cards)) == "Ace of Spades")       # True
+
+
+cards = [Card(2, 'Hearts'),
+         Card(10, 'Diamonds'),
+         Card('Ace', 'Clubs')]
+print(min(cards) == Card(2, 'Hearts'))             # True
+print(max(cards) == Card('Ace', 'Clubs'))          # True
+print(str(min(cards)) == "2 of Hearts")            # True
+print(str(max(cards)) == "Ace of Clubs")           # True
+
+cards = [Card(5, 'Hearts')]
+print(min(cards) == Card(5, 'Hearts'))             # True
+print(max(cards) == Card(5, 'Hearts'))             # True
+print(str(Card(5, 'Hearts')) == "5 of Hearts")     # True
+
+cards = [Card(4, 'Hearts'),
+         Card(4, 'Diamonds'),
+         Card(10, 'Clubs')]
+print(min(cards).rank == 4)                        # True
+print(max(cards) == Card(10, 'Clubs'))             # True
+print(str(Card(10, 'Clubs')) == "10 of Clubs")     # True
+
+cards = [Card(7, 'Diamonds'),
+         Card('Jack', 'Diamonds'),
+         Card('Jack', 'Spades')]
+print(min(cards) == Card(7, 'Diamonds'))           # True
+print(max(cards).rank == 'Jack')                   # True
+print(str(Card(7, 'Diamonds')) == "7 of Diamonds") # True
+
+cards = [Card(8, 'Diamonds'),
+         Card(8, 'Clubs'),
+         Card(8, 'Spades')]
+print(min(cards).rank == 8)                        # True
+print(max(cards).rank == 8)                        # True
+
