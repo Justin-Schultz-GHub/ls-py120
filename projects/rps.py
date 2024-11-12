@@ -66,11 +66,11 @@ class RPSGame:
         print(f'The computer chose: {self._computer.move}')
 
         if self._human_wins():
-            print(f'You win!')
+            print('You win!')
         elif self._computer_wins():
-            print(f'The computer wins!')
+            print('The computer wins!')
         else:
-            print(f'It\'s a tie!')
+            print('It\'s a tie!')
 
     def _play_again(self):
         answer = input('Play again? (y/n): ')
