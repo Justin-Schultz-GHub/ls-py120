@@ -141,13 +141,23 @@ class TTTGame:
     def display_goodbye_message(self):
         print("Thanks for playing!")
 
+    @staticmethod
+    def _join_or(choices, separator=", ", conjuction="or"):
+        if len(choices) > 1:
+            last_value = choices.pop()
+            choices_str = (f"{separator.join(choices)}"
+                      f"{separator}{conjuction} {last_value}")
+
+            return choices_str
+
+        return str(choices[0])
+
     def human_turn(self):
         valid_choices = self.board.unused_squares()
-        choice = None
 
         while True:
             choices_list = [str(choice) for choice in valid_choices]
-            choices_str = ", ".join(choices_list)
+            choices_str = TTTGame._join_or(choices_list)
             prompt = f"Choose a square ({choices_str}): "
 
             try:
@@ -189,8 +199,6 @@ class TTTGame:
             print("The computer wins!")
         else:
             print("Game over! It\'s a tie!")
-
-
 
 
 game = TTTGame()
