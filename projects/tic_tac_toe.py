@@ -188,6 +188,9 @@ class TTTGame:
         self.board.mark_square_at(choice, self.computer.marker)
 
     def find_vulnerable_square(self):
+        ODDS = [1, 3, 5, 7, 9]
+
+        # Priority 1: Check for empty middle square
         if self.board.squares[5].is_unused():
             return 5
 
@@ -199,12 +202,52 @@ class TTTGame:
                        self.board.squares[sq3].marker
                        ]
 
+            # Priority 2: Check for computer win
             if (
                 markers.count(Square.COMPUTER_MARKER) == 2
                 and markers.count(Square.INITIAL_MARKER) == 1
             ):
                 return line[markers.index(Square.INITIAL_MARKER)]
 
+            # Priority 3: Human block check
+            if (
+                markers.count(Square.HUMAN_MARKER) == 2
+                and markers.count(Square.INITIAL_MARKER) == 1
+            ):
+                return line[markers.index(Square.INITIAL_MARKER)]
+
+        for line in self.POSSIBLE_WINNING_ROWS:
+            sq1, sq2, sq3 = line
+
+            markers = [self.board.squares[sq1].marker,
+                       self.board.squares[sq2].marker,
+                       self.board.squares[sq3].marker
+                       ]
+
+            # Priority 4: Take advantage line, prioritize corners
+            if (
+                markers.count(Square.COMPUTER_MARKER) >= 1
+                and markers.count(Square.HUMAN_MARKER) == 0
+            ):
+                for num in ODDS:
+                    if self.board.squares[num].is_unused():
+                        return num
+
+                return line[markers.index(Square.INITIAL_MARKER)]
+
+            # Priority 5: Take corner
+            for num in ODDS:
+                if self.board.squares[num].is_unused():
+                    return num
+
+            # Priority 6: Fallback marker
+            if (
+                markers.count(Square.COMPUTER_MARKER) == 2
+                and markers.count(Square.HUMAN_MARKER) == 0
+            ):
+                return line[markers.index(Square.INITIAL_MARKER)]
+
+        # Return none and choose random square
         return None
 
     def is_game_over(self):
