@@ -30,7 +30,7 @@ class Board:
         print()
 
     def display_clear(self):
-        clear_screen()
+        # clear_screen()
         print("\n")
         self.display()
 
@@ -182,8 +182,30 @@ class TTTGame:
 
     def computer_turn(self):
         valid_choices = self.board.unused_squares()
-        choice = random.choice(valid_choices)
+        choice = self.find_vulnerable_square()
+        if choice is None:
+            choice = random.choice(valid_choices)
         self.board.mark_square_at(choice, self.computer.marker)
+
+    def find_vulnerable_square(self):
+        if self.board.squares[5].is_unused():
+            return 5
+
+        for line in self.POSSIBLE_WINNING_ROWS:
+            sq1, sq2, sq3 = line
+
+            markers = [self.board.squares[sq1].marker,
+                       self.board.squares[sq2].marker,
+                       self.board.squares[sq3].marker
+                       ]
+
+            if (
+                markers.count(Square.COMPUTER_MARKER) == 2
+                and markers.count(Square.INITIAL_MARKER) == 1
+            ):
+                return line[markers.index(Square.INITIAL_MARKER)]
+
+        return None
 
     def is_game_over(self):
         return self.board.is_full() or self.someone_won()
