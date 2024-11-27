@@ -115,24 +115,33 @@ class TTTGame:
 
     def play(self):
         self.welcome_player()
-        self.board.display()
 
         while True:
-            self.human_turn()
+            self.board.display()
 
-            if self.is_game_over():
-                break
+            while True:
+                self.human_turn()
 
-            self.computer_turn()
+                if self.is_game_over():
+                    break
 
-            if self.is_game_over():
-                break
+                self.computer_turn()
+
+                if self.is_game_over():
+                    break
+
+                self.board.display_clear()
 
             self.board.display_clear()
+            self.announce_result()
 
-        self.board.display_clear()
-        self.announce_result()
+            if not self.play_again():
+                break
+
+            self.reset_game()
+
         self.display_goodbye_message()
+
 
     def welcome_player(self):
         clear_screen()
@@ -199,6 +208,19 @@ class TTTGame:
             print("The computer wins!")
         else:
             print("Game over! It\'s a tie!")
+
+    def play_again(self):
+        prompt = input('Play again? (y/n): ').lower()
+        while prompt[0] not in ['y', 'n']:
+            prompt = input('Please enter a valid input (y/n): ').lower()
+
+        return prompt[0] == 'y'
+
+    def reset_game(self):
+        for num in range(1, 10):
+            self.board.mark_square_at(num, Square.INITIAL_MARKER)
+
+        clear_screen()
 
 
 game = TTTGame()
