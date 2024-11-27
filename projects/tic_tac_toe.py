@@ -30,7 +30,7 @@ class Board:
         print()
 
     def display_clear(self):
-        # clear_screen()
+        clear_screen()
         print("\n")
         self.display()
 
