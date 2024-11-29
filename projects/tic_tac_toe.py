@@ -30,7 +30,7 @@ class Board:
         print()
 
     def display_clear(self):
-        clear_screen()
+        # clear_screen()
         print("\n")
         self.display()
 
@@ -189,6 +189,7 @@ class TTTGame:
 
     def find_vulnerable_square(self):
         ODDS = [1, 3, 5, 7, 9]
+        EVENS = [2, 4, 6, 8]
 
         # Priority 1: Check for empty middle square
         if self.board.squares[5].is_unused():
@@ -216,6 +217,16 @@ class TTTGame:
             ):
                 return line[markers.index(Square.INITIAL_MARKER)]
 
+            #Prio 4: Check double intercardinals, and block cardinal
+            print(self.board.squares[sq1].marker == Square.HUMAN_MARKER)
+            if (
+                self.board.squares[sq1].marker == Square.HUMAN_MARKER
+                and self.board.squares[sq3].marker == Square.HUMAN_MARKER
+                and sq1 + sq3 == 10
+                and sq1 % 2 == 1
+            ):
+                return random.choice(EVENS)
+
         for line in self.POSSIBLE_WINNING_ROWS:
             sq1, sq2, sq3 = line
 
@@ -224,7 +235,7 @@ class TTTGame:
                        self.board.squares[sq3].marker
                        ]
 
-            # Priority 4: Take advantage line, prioritize corners
+            # Priority 5: Take advantage line, prioritize corners
             if (
                 markers.count(Square.COMPUTER_MARKER) >= 1
                 and markers.count(Square.HUMAN_MARKER) == 0
@@ -232,15 +243,14 @@ class TTTGame:
                 for num in ODDS:
                     if self.board.squares[num].is_unused():
                         return num
-
                 return line[markers.index(Square.INITIAL_MARKER)]
 
-            # Priority 5: Take corner
+            # Priority 6: Take corner
             for num in ODDS:
                 if self.board.squares[num].is_unused():
                     return num
 
-            # Priority 6: Fallback marker
+            # Priority 7: Fallback marker
             if (
                 markers.count(Square.COMPUTER_MARKER) == 2
                 and markers.count(Square.HUMAN_MARKER) == 0
