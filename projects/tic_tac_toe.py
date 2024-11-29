@@ -30,7 +30,7 @@ class Board:
         print()
 
     def display_clear(self):
-        # clear_screen()
+        clear_screen()
         print("\n")
         self.display()
 
@@ -112,6 +112,7 @@ class TTTGame:
         self.board = Board()
         self.human = Human()
         self.computer = Computer()
+        self.human_first = random.choice([True, False])
 
     def play(self):
         self.welcome_player()
@@ -119,26 +120,50 @@ class TTTGame:
         while True:
             self.board.display()
 
-            while True:
-                self.human_turn()
+            if self.human_first:
+                while True:
+                    self.human_turn()
 
-                if self.is_game_over():
-                    break
+                    if self.is_game_over():
+                        break
 
-                self.computer_turn()
+                    self.computer_turn()
 
-                if self.is_game_over():
-                    break
+                    if self.is_game_over():
+                        break
+
+                    self.board.display_clear()
 
                 self.board.display_clear()
+                self.announce_result()
 
-            self.board.display_clear()
-            self.announce_result()
+                if not self.play_again():
+                    break
 
-            if not self.play_again():
-                break
+                self.human_first = not self.human_first
+                self.reset_game()
+            else:
+                while True:
+                    self.computer_turn()
 
-            self.reset_game()
+                    if self.is_game_over():
+                        break
+
+                    self.board.display_clear()
+
+                    self.human_turn()
+
+                    if self.is_game_over():
+                        break
+
+                self.board.display_clear()
+                self.announce_result()
+
+                if not self.play_again():
+                    break
+
+                self.human_first = not self.human_first
+                self.reset_game()
 
         self.display_goodbye_message()
 
@@ -190,10 +215,12 @@ class TTTGame:
     def find_vulnerable_square(self):
         ODDS = [1, 3, 5, 7, 9]
         EVENS = [2, 4, 6, 8]
+        MIDDLE_SQUARE = 5
+        SUM_OF_OPPOSITE_CORNERS = 10
 
         # Priority 1: Check for empty middle square
-        if self.board.squares[5].is_unused():
-            return 5
+        if self.board.squares[MIDDLE_SQUARE].is_unused():
+            return MIDDLE_SQUARE
 
         for line in self.POSSIBLE_WINNING_ROWS:
             sq1, sq2, sq3 = line
@@ -217,12 +244,11 @@ class TTTGame:
             ):
                 return line[markers.index(Square.INITIAL_MARKER)]
 
-            #Prio 4: Check double intercardinals, and block cardinal
-            print(self.board.squares[sq1].marker == Square.HUMAN_MARKER)
+            #Priority 4: Check double intercardinals, and block cardinal
             if (
                 self.board.squares[sq1].marker == Square.HUMAN_MARKER
                 and self.board.squares[sq3].marker == Square.HUMAN_MARKER
-                and sq1 + sq3 == 10
+                and sq1 + sq3 == SUM_OF_OPPOSITE_CORNERS
                 and sq1 % 2 == 1
             ):
                 return random.choice(EVENS)
