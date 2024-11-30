@@ -1,5 +1,6 @@
 import random
 import os
+import time
 
 def clear_screen():
     os.system('clear')
@@ -112,61 +113,50 @@ class TTTGame:
         self.board = Board()
         self.human = Human()
         self.computer = Computer()
-        self.human_first = random.choice([True, False])
+        self.first_player = random.choice([self.human, self.computer])
 
     def play(self):
         self.welcome_player()
+        time.sleep(2)
 
         while True:
+            current_player = self.first_player
             self.board.display()
 
-            if self.human_first:
-                while True:
-                    self.human_turn()
-
-                    if self.is_game_over():
-                        break
-
-                    self.computer_turn()
-
-                    if self.is_game_over():
-                        break
-
-                    self.board.display_clear()
-
+            while True:
                 self.board.display_clear()
-                self.announce_result()
+                self.player_turn(current_player)
 
-                if not self.play_again():
+                if self.is_game_over():
                     break
 
-                self.human_first = not self.human_first
-                self.reset_game()
-            else:
-                while True:
-                    self.computer_turn()
-
-                    if self.is_game_over():
-                        break
-
+                if current_player == self.human:
                     self.board.display_clear()
 
-                    self.human_turn()
-
-                    if self.is_game_over():
-                        break
-
-                self.board.display_clear()
-                self.announce_result()
-
-                if not self.play_again():
+                if self.is_game_over():
                     break
 
-                self.human_first = not self.human_first
-                self.reset_game()
+                current_player = self.toggle_player(current_player)
+
+            self.board.display_clear()
+            self.announce_result()
+
+            if not self.play_again():
+                break
+
+            self.first_player = self.toggle_player(self.first_player)
+            self.reset_game()
 
         self.display_goodbye_message()
 
+    def toggle_player(self, player):
+        return self.computer if player == self.human else self.human
+
+    def player_turn(self, player):
+        if player == self.human:
+            self.human_turn()
+        else:
+            self.computer_turn()
 
     def welcome_player(self):
         clear_screen()
