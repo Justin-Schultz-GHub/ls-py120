@@ -203,8 +203,8 @@ class TTTGame:
         self.board.mark_square_at(choice, self.computer.marker)
 
     def find_vulnerable_square(self):
-        ODDS = [1, 3, 5, 7, 9]
-        EVENS = [2, 4, 6, 8]
+        INTERCARDINALS = [1, 3, 7, 9]
+        CARDINALS = [2, 4, 6, 8]
         MIDDLE_SQUARE = 5
         SUM_OF_OPPOSITE_CORNERS = 10
 
@@ -222,58 +222,27 @@ class TTTGame:
 
             # Priority 2: Check for computer win
             if (
-                markers.count(Square.COMPUTER_MARKER) == 2
+                (markers.count(Square.COMPUTER_MARKER) == 2
+                or markers.count(Square.HUMAN_MARKER) == 2)
                 and markers.count(Square.INITIAL_MARKER) == 1
             ):
                 return line[markers.index(Square.INITIAL_MARKER)]
 
-            # Priority 3: Human block check
-            if (
-                markers.count(Square.HUMAN_MARKER) == 2
-                and markers.count(Square.INITIAL_MARKER) == 1
-            ):
-                return line[markers.index(Square.INITIAL_MARKER)]
-
-            #Priority 4: Check double intercardinals, and block cardinal
+            #Priority 3: Check double intercardinals, and block cardinal
             if (
                 self.board.squares[sq1].marker == Square.HUMAN_MARKER
                 and self.board.squares[sq3].marker == Square.HUMAN_MARKER
                 and sq1 + sq3 == SUM_OF_OPPOSITE_CORNERS
                 and sq1 % 2 == 1
             ):
-                return random.choice(EVENS)
+                return random.choice(CARDINALS)
 
-        for line in self.POSSIBLE_WINNING_ROWS:
-            sq1, sq2, sq3 = line
+        # Priority 4: Take corner
+        for square in INTERCARDINALS:
+            if self.board.squares[square].is_unused():
+                return square
 
-            markers = [self.board.squares[sq1].marker,
-                       self.board.squares[sq2].marker,
-                       self.board.squares[sq3].marker
-                       ]
-
-            # Priority 5: Take advantage line, prioritize corners
-            if (
-                markers.count(Square.COMPUTER_MARKER) >= 1
-                and markers.count(Square.HUMAN_MARKER) == 0
-            ):
-                for num in ODDS:
-                    if self.board.squares[num].is_unused():
-                        return num
-                return line[markers.index(Square.INITIAL_MARKER)]
-
-            # Priority 6: Take corner
-            for num in ODDS:
-                if self.board.squares[num].is_unused():
-                    return num
-
-            # Priority 7: Fallback marker
-            if (
-                markers.count(Square.COMPUTER_MARKER) == 2
-                and markers.count(Square.HUMAN_MARKER) == 0
-            ):
-                return line[markers.index(Square.INITIAL_MARKER)]
-
-        # Return none and choose random square
+        # Return none and choose random square (fallback)
         return None
 
     def is_game_over(self):
