@@ -269,7 +269,7 @@ class TTTGame:
             if self.board.squares[square].is_unused():
                 return square
 
-        # Return vulnerable square. If None, choose random square (fallback)
+        # Return None and choose random square (fallback)
         return None
 
     def is_game_over(self):
