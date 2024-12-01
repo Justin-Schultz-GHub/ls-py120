@@ -207,6 +207,12 @@ class TTTGame:
         CARDINALS = [2, 4, 6, 8]
         MIDDLE_SQUARE = 5
         SUM_OF_OPPOSITE_CORNERS = 10
+        L_SQUARE_DICT = {
+            1: [(6, 3), (8, 7)],
+            3: [(4, 1), (8, 9)],
+            7: [(2, 1), (6, 9)],
+            9: [(4, 7), (2, 3)],
+        }
 
         # Priority 1: Check for empty middle square
         if self.board.squares[MIDDLE_SQUARE].is_unused():
@@ -220,7 +226,7 @@ class TTTGame:
                        self.board.squares[sq3].marker
                        ]
 
-            # Priority 2: Check for computer win
+            # Priority 2: Check for computer win or block player
             if (
                 (markers.count(Square.COMPUTER_MARKER) == 2
                 or markers.count(Square.HUMAN_MARKER) == 2)
@@ -237,12 +243,33 @@ class TTTGame:
             ):
                 return random.choice(CARDINALS)
 
-        # Priority 4: Take corner
+        #Priority 4: Check intercardinal and opposing cardinals, block shared
+        # corner
+        for key, value in L_SQUARE_DICT.items():
+            sq1 = [value][0][0][0]
+            block1 = [value][0][0][1]
+            sq2 = [value][0][1][0]
+            block2 = [value][0][1][1]
+
+            if (
+                self.board.squares[key].marker == Square.HUMAN_MARKER
+                and self.board.squares[sq1].marker == Square.HUMAN_MARKER
+                and self.board.squares[block1].marker == Square.INITIAL_MARKER
+            ):
+                return block1
+            if (
+                self.board.squares[key].marker == Square.HUMAN_MARKER
+                and self.board.squares[sq2].marker == Square.HUMAN_MARKER
+                and self.board.squares[block2].marker == Square.INITIAL_MARKER
+            ):
+                return block2
+
+        # Priority 5: Take corner
         for square in INTERCARDINALS:
             if self.board.squares[square].is_unused():
                 return square
 
-        # Return none and choose random square (fallback)
+        # Return vulnerable square. If None, choose random square (fallback)
         return None
 
     def is_game_over(self):
