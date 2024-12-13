@@ -4,6 +4,7 @@ import time
 
 def clear_screen():
     os.system('clear')
+    pass
 
 def prompt(message):
     print(f'==> {message}')
@@ -13,6 +14,12 @@ def enter_to_continue():
 
 def sleep(timer=2):
     time.sleep(timer)
+
+def player_total_prompt():
+    return f'Player hand total: '
+
+def dealer_total_prompt():
+    return f'Dealer hand total: '
 
 class Card:
     SUITS = ('Clubs', 'Diamonds', 'Hearts', 'Spades')
@@ -36,14 +43,23 @@ class Card:
     }
 
     def __init__(self, rank, suit):
-        self.rank = rank
-        self.suit = suit
-        self.value = self.CARD_VALUES[rank]
+        self._rank = rank
+        self._suit = suit
+        self._value = self.CARD_VALUES[rank]
+
+    @property
+    def rank(self):
+        return self._rank
+
+    @property
+    def suit(self):
+        return self._suit
+
+    @property
+    def value(self):
+        return self._value
 
     def __str__(self):
-        return f'{self.rank} of {self.suit}'
-
-    def __repr__(self):
         return f'{self.rank} of {self.suit}'
 
 
@@ -71,6 +87,9 @@ class Participant:
     def is_busted(self):
         return self.score > 21
 
+    def is_blackjack(self):
+        return self.score == 21 and len(self.hand) == 2
+
     def update_score(self, hand):
         ace_counter = 0
         hand_total = 0
@@ -88,6 +107,7 @@ class Participant:
                 hand_total += 1
 
         self.score = hand_total
+
 
 class Player(Participant):
     def __init__(self):
@@ -110,12 +130,13 @@ class Dealer(Participant):
 
 class TwentyOneGame:
     TWENTY_ONE = 21
+    HIT = 'hit'
+    STAY = 'stay'
 
     def __init__(self):
         self.deck = Deck()
         self.player = Player()
         self.dealer = Dealer(self.deck)
-        pass
 
     def start(self):
         self.display_welcome_message()
@@ -123,23 +144,33 @@ class TwentyOneGame:
 
         if self.player.score == self.TWENTY_ONE:
             self.show_cards()
+            self.display_player_score()
             enter_to_continue()
             self.display_result()
             sleep()
         else:
             while not self.player.is_busted():
                 self.show_cards()
+                self.display_player_score()
+                player_action = self.player_turn()
                 if (self.player.score == self.TWENTY_ONE
-                or not self.player_turn()
+                or player_action == self.STAY
                 ):
                     break
 
-                if self.player.is_busted():
-                    self.display_result()
-                    sleep()
-                else:
+            if self.player.is_busted():
+                self.display_result()
+                sleep()
+            else:
+                clear_screen()
+                self.show_cards()
+                self.display_player_score()
+                if not self.dealer.is_blackjack():
                     self.dealer_turn()
+                else:
+                    self.reveal_dealer_hidden()
 
+        self.display_result()
         self.display_goodbye_message()
 
     def deal_cards(self):
@@ -156,8 +187,6 @@ class TwentyOneGame:
         for card in self.player.hand:
             prompt(card)
 
-        self.display_player_score()
-
     def player_turn(self):
         if (self.player.score == self.TWENTY_ONE
         and len(self.player.hand) == 2
@@ -169,7 +198,7 @@ class TwentyOneGame:
         prompt('Hit or stay? (h/s)')
         hit_or_stay = input().strip()
 
-        while hit_or_stay[0].lower() not in 'hs':
+        while not hit_or_stay or hit_or_stay[0].lower() not in 'hs':
             prompt('Please enter a valid input: (h/s)')
             hit_or_stay = input().strip()
 
@@ -181,24 +210,15 @@ class TwentyOneGame:
             sleep()
             clear_screen()
 
-            return hit_or_stay == 'h'
+            return self.HIT
         else:
             prompt('You stay')
             sleep()
 
-            return hit_or_stay == 'h'
+            return self.STAY
 
     def dealer_turn(self):
-        clear_screen()
-        prompt('The dealer\'s hand is:')
-
-        for card in self.dealer.hand[1:]:
-            prompt(card)
-
-        prompt('And the face down card was:')
-        sleep()
-        prompt(f'the {self.dealer.hand[0]}')
-        sleep()
+        self.reveal_dealer_hidden()
 
         if self.dealer.score == self.TWENTY_ONE:
             clear_screen()
@@ -208,10 +228,8 @@ class TwentyOneGame:
             clear_screen()
             self.display_player_score()
             print()
-            prompt('The dealer\'s hand is:')
-            for card in self.dealer.hand:
-                prompt(card)
-            prompt(f'Dealer hand total: {self.dealer.score}')
+            self.show_dealer_hand()
+            self.display_dealer_score()
 
             enter_to_continue()
             prompt('The dealer hits!')
@@ -220,49 +238,83 @@ class TwentyOneGame:
             self.dealer.hit(self.deck)
             clear_screen()
             prompt(f'The dealer draws a(n) {self.dealer.hand[-1]}')
-            prompt(f'Dealer hand total: {self.dealer.score}')
+            self.display_dealer_score()
             enter_to_continue()
         else:
-            prompt('The dealer stays')
-            sleep()
+            if not self.dealer.is_busted() and self.dealer.score != 21:
+                prompt('The dealer stays')
+                sleep()
+
+    def reveal_dealer_hidden(self):
+        clear_screen()
+        prompt('The dealer\'s hand is:')
+
+        for card in self.dealer.hand[1:]:
+            prompt(card)
+
+        prompt('And the face down card was:')
+        sleep()
+        prompt(f'the {self.dealer.hand[0]}')
+        enter_to_continue()
+
+    def show_dealer_hand(self):
+        prompt('The dealer\'s hand is:')
+        for card in self.dealer.hand:
+            prompt(card)
 
     def display_welcome_message(self):
         clear_screen()
         print('Welcome to Twenty One')
 
     def display_goodbye_message(self):
-        clear_screen()
         prompt('Thanks for playing!')
 
     def display_player_hit(self):
         prompt(f'You draw a(n) {self.player.hand[-1]}!')
 
     def display_player_score(self):
-        prompt(f'Player hand total is: {self.player.score}')
+        prompt(f'{player_total_prompt()}{self.player.score}')
+
+    def display_dealer_score(self):
+        prompt(f'{dealer_total_prompt()}{self.dealer.score}')
 
     def display_result(self):
-        if self.player.score > self.TWENTY_ONE:
+        if self.player.is_blackjack():
+            clear_screen()
+            self.display_player_score()
+            prompt('You were dealt 21! You win!')
+
+        elif self.dealer.is_blackjack():
+            clear_screen()
+            prompt('The dealer was dealt 21! The dealer wins')
+
+        elif self.player.is_busted():
             clear_screen()
             self.display_player_score()
             prompt('You busted!')
 
-        if self.TWENTY_ONE >= self.player.score > self.dealer.score:
+        elif self.dealer.is_busted():
             clear_screen()
-            prompt(f'Player hand total: {self.player.score}')
-            prompt(f'Dealer hand total: {self.dealer.score}')
-            prompt(f'You win!')
+            prompt('The dealer busted! You win!')
 
-        if self.TWENTY_ONE >= self.dealer.score > self.player.score:
-            clear_screen()
-            prompt(f'Player hand total: {self.player.score}')
-            prompt(f'Dealer hand total: {self.dealer.score}')
-            prompt(f'The dealer wins!')
+        else:
+            if self.player.score > self.dealer.score:
+                clear_screen()
+                prompt(f'{player_total_prompt()}{self.player.score}')
+                prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+                prompt(f'You win!')
 
-        if self.player.score == self.dealer.score:
-            clear_screen()
-            prompt(f'Player hand total: {self.player.score}')
-            prompt(f'Dealer hand total: {self.dealer.score}')
-            prompt(f'It\'s a tie!')
+            elif self.dealer.score > self.player.score:
+                clear_screen()
+                prompt(f'{player_total_prompt()}{self.player.score}')
+                prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+                prompt(f'The dealer wins!')
+
+            else:
+                clear_screen()
+                prompt(f'{player_total_prompt()}{self.player.score}')
+                prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+                prompt(f'It\'s a tie!')
 
 
 game = TwentyOneGame()
