@@ -71,6 +71,9 @@ class Deck:
                     ]
         random.shuffle(self.cards)
 
+    def is_low(self):
+        return len(self.cards) < 20
+
     def __repr__(self):
         return self.cards
 
@@ -112,6 +115,7 @@ class Participant:
 class Player(Participant):
     def __init__(self):
         super().__init__()
+        self.money = 5
 
 
 class Dealer(Participant):
@@ -127,6 +131,9 @@ class Dealer(Participant):
         player.update_score(player.hand)
         self.update_score(self.hand)
 
+    def shuffle_deck(self):
+        self.deck.__init__()
+
 
 class TwentyOneGame:
     TWENTY_ONE = 21
@@ -140,26 +147,49 @@ class TwentyOneGame:
 
     def start(self):
         self.display_welcome_message()
-        self.deal_cards()
+        sleep()
 
+        while True:
+            clear_screen()
+
+            if 10 > self.player.money > 0:
+                self.deal_cards()
+                self.display_money()
+                self.play_round()
+                if not self.play_again():
+                    break
+                else:
+                    self.reset_game()
+            elif self.player.money < 1:
+                self.display_money()
+                self.comment_on_wealth()
+                break
+            else:
+                self.display_money()
+                self.comment_on_wealth()
+                break
+
+        self.display_goodbye_message()
+
+    def play_round(self):
         if self.player.score == self.TWENTY_ONE:
             self.show_cards()
             self.display_player_score()
             enter_to_continue()
-            self.display_result()
+            result = self.handle_result()
+            self.display_result(result)
             sleep()
         else:
             while not self.player.is_busted():
                 self.show_cards()
                 self.display_player_score()
                 player_action = self.player_turn()
-                if (self.player.score == self.TWENTY_ONE
-                or player_action == self.STAY
-                ):
+                if player_action == self.STAY:
                     break
 
             if self.player.is_busted():
-                self.display_result()
+                result = self.handle_result()
+                self.display_result(result)
                 sleep()
             else:
                 clear_screen()
@@ -170,11 +200,22 @@ class TwentyOneGame:
                 else:
                     self.reveal_dealer_hidden()
 
-        self.display_result()
-        self.display_goodbye_message()
+                result = self.handle_result()
+                self.display_result(result)
 
     def deal_cards(self):
+        if self.deck.is_low():
+            self.dealer.shuffle_deck()
+            prompt('Shuffling deck.')
+            sleep(1)
+            clear_screen()
+            prompt('Shuffling deck..')
+            sleep(1)
+            clear_screen()
+            prompt('Shuffling deck...')
+            sleep(1)
         self.dealer.deal(self.player)
+        clear_screen()
 
     def show_cards(self):
         prompt('The dealer\'s hand is: ')
@@ -192,6 +233,11 @@ class TwentyOneGame:
         and len(self.player.hand) == 2
         ):
             prompt(f'You were dealt {self.TWENTY_ONE}!')
+            sleep()
+            return None
+
+        if self.player.score == self.TWENTY_ONE:
+            prompt(f'You have {self.TWENTY_ONE}!')
             sleep()
             return None
 
@@ -267,6 +313,7 @@ class TwentyOneGame:
         print('Welcome to Twenty One')
 
     def display_goodbye_message(self):
+        clear_screen()
         prompt('Thanks for playing!')
 
     def display_player_hit(self):
@@ -278,43 +325,85 @@ class TwentyOneGame:
     def display_dealer_score(self):
         prompt(f'{dealer_total_prompt()}{self.dealer.score}')
 
-    def display_result(self):
+    def display_money(self):
+        prompt(f'Remaining cash: ${self.player.money}')
+        print()
+
+    def add_money(self):
+        self.player.money += 1
+
+    def subtract_money(self):
+        self.player.money -= 1
+
+    def handle_result(self):
         if self.player.is_blackjack():
-            clear_screen()
-            self.display_player_score()
-            prompt('You were dealt 21! You win!')
-
+            self.add_money()
+            return 'blackjack'
         elif self.dealer.is_blackjack():
-            clear_screen()
-            prompt('The dealer was dealt 21! The dealer wins')
-
+            self.subtract_money()
+            return 'dealer_blackjack'
         elif self.player.is_busted():
-            clear_screen()
-            self.display_player_score()
-            prompt('You busted!')
-
+            self.subtract_money()
+            return 'bust'
         elif self.dealer.is_busted():
-            clear_screen()
-            prompt('The dealer busted! You win!')
-
+            self.add_money()
+            return 'dealer_bust'
+        elif self.player.score > self.dealer.score:
+            self.add_money()
+            return 'win'
+        elif self.dealer.score > self.player.score:
+            self.subtract_money()
+            return 'loss'
         else:
-            if self.player.score > self.dealer.score:
-                clear_screen()
-                prompt(f'{player_total_prompt()}{self.player.score}')
-                prompt(f'{dealer_total_prompt()}{self.dealer.score}')
-                prompt(f'You win!')
+            return 'tie'
 
-            elif self.dealer.score > self.player.score:
-                clear_screen()
-                prompt(f'{player_total_prompt()}{self.player.score}')
-                prompt(f'{dealer_total_prompt()}{self.dealer.score}')
-                prompt(f'The dealer wins!')
+    def display_result(self, result):
+        clear_screen()
 
-            else:
-                clear_screen()
-                prompt(f'{player_total_prompt()}{self.player.score}')
-                prompt(f'{dealer_total_prompt()}{self.dealer.score}')
-                prompt(f'It\'s a tie!')
+        if result == 'blackjack':
+            prompt('You were dealt 21! You win!')
+        elif result == 'dealer_blackjack':
+            prompt('The dealer was dealt 21! The dealer wins.')
+        elif result == 'bust':
+            prompt(f'{player_total_prompt()}{self.player.score}')
+            prompt('You busted!')
+        elif result == 'dealer_bust':
+            prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+            prompt('The dealer busted! You win!')
+        elif result == 'win':
+            prompt(f'{player_total_prompt()}{self.player.score}')
+            prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+            prompt('You win!')
+        elif result == 'loss':
+            prompt(f'{player_total_prompt()}{self.player.score}')
+            prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+            prompt('The dealer wins!')
+        elif result == 'tie':
+            prompt(f'{player_total_prompt()}{self.player.score}')
+            prompt(f'{dealer_total_prompt()}{self.dealer.score}')
+            prompt('It\'s a tie!')
+
+    def comment_on_wealth(self):
+        if self.player.money >= 10:
+            prompt('You\'ve doubled your cash! Quit while you\'re ahead!')
+            sleep(3)
+        else:
+            prompt('Sorry, you\'re broke!')
+            sleep(3)
+
+    def play_again(self):
+        self.display_money()
+        prompt = input('Play again? (y/n): ').lower()
+        while not prompt or prompt[0] not in 'yn':
+            prompt = input('Please enter a valid input (y/n): ').lower()
+
+        return prompt[0] == 'y'
+
+    def reset_game(self):
+        self.player.hand.clear()
+        self.dealer.hand.clear()
+        self.player.update_score(self.player.hand)
+        self.dealer.update_score(self.dealer.hand)
 
 
 game = TwentyOneGame()
