@@ -4,7 +4,6 @@ import time
 
 def clear_screen():
     os.system('clear')
-    pass
 
 def prompt(message):
     print(f'==> {message}')
@@ -16,10 +15,10 @@ def sleep(timer=2):
     time.sleep(timer)
 
 def player_total_prompt():
-    return f'Player hand total: '
+    return 'Player hand total: '
 
 def dealer_total_prompt():
-    return f'Dealer hand total: '
+    return 'Dealer hand total: '
 
 class Card:
     SUITS = ('Clubs', 'Diamonds', 'Hearts', 'Spades')
@@ -132,7 +131,11 @@ class Dealer(Participant):
         self.update_score(self.hand)
 
     def shuffle_deck(self):
-        self.deck.__init__()
+        self.deck.cards = [Card(rank, suit)
+                          for suit in Card.SUITS
+                          for rank in Card.RANKS
+                          ]
+        random.shuffle(self.deck.cards)
 
 
 class TwentyOneGame:
@@ -156,10 +159,10 @@ class TwentyOneGame:
                 self.deal_cards()
                 self.display_money()
                 self.play_round()
-                if not self.play_again():
-                    break
-                else:
+                if self.play_again():
                     self.reset_game()
+                else:
+                    break
             elif self.player.money < 1:
                 self.display_money()
                 self.comment_on_wealth()
@@ -257,11 +260,11 @@ class TwentyOneGame:
             clear_screen()
 
             return self.HIT
-        else:
-            prompt('You stay')
-            sleep()
 
-            return self.STAY
+        prompt('You stay')
+        sleep()
+
+        return self.STAY
 
     def dealer_turn(self):
         self.reveal_dealer_hidden()
@@ -286,10 +289,10 @@ class TwentyOneGame:
             prompt(f'The dealer draws a(n) {self.dealer.hand[-1]}')
             self.display_dealer_score()
             enter_to_continue()
-        else:
-            if not self.dealer.is_busted() and self.dealer.score != 21:
-                prompt('The dealer stays')
-                sleep()
+
+        if not self.dealer.is_busted() and self.dealer.score != 21:
+            prompt('The dealer stays')
+            sleep()
 
     def reveal_dealer_hidden(self):
         clear_screen()
@@ -336,26 +339,30 @@ class TwentyOneGame:
         self.player.money -= 1
 
     def handle_result(self):
+        result = None
+
         if self.player.is_blackjack():
             self.add_money()
-            return 'blackjack'
+            result = 'blackjack'
         elif self.dealer.is_blackjack():
             self.subtract_money()
-            return 'dealer_blackjack'
+            result = 'dealer_blackjack'
         elif self.player.is_busted():
             self.subtract_money()
-            return 'bust'
+            result = 'bust'
         elif self.dealer.is_busted():
             self.add_money()
-            return 'dealer_bust'
+            result = 'dealer_bust'
         elif self.player.score > self.dealer.score:
             self.add_money()
-            return 'win'
+            result = 'win'
         elif self.dealer.score > self.player.score:
             self.subtract_money()
-            return 'loss'
+            result = 'loss'
         else:
-            return 'tie'
+            result = 'tie'
+
+        return result
 
     def display_result(self, result):
         clear_screen()
@@ -393,11 +400,11 @@ class TwentyOneGame:
 
     def play_again(self):
         self.display_money()
-        prompt = input('Play again? (y/n): ').lower()
-        while not prompt or prompt[0] not in 'yn':
-            prompt = input('Please enter a valid input (y/n): ').lower()
+        replay = input('Play again? (y/n): ').lower()
+        while not replay or replay[0] not in 'yn':
+            replay = input('Please enter a valid input (y/n): ').lower()
 
-        return prompt[0] == 'y'
+        return replay[0] == 'y'
 
     def reset_game(self):
         self.player.hand.clear()
