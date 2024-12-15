@@ -87,10 +87,10 @@ class Participant:
         self.update_score(self.hand)
 
     def is_busted(self):
-        return self.score > 21
+        return self.score > TwentyOneGame.TWENTY_ONE
 
     def is_blackjack(self):
-        return self.score == 21 and len(self.hand) == 2
+        return self.score == TwentyOneGame.TWENTY_ONE and len(self.hand) == 2
 
     def update_score(self, hand):
         ace_counter = 0
@@ -99,14 +99,13 @@ class Participant:
         for card in hand:
             if card.rank == 'Ace':
                 ace_counter += 1
+                hand_total += Card.CARD_VALUES['Ace']
             else:
                 hand_total += card.value
 
         for _ in range(ace_counter):
-            if hand_total + Card.CARD_VALUES['Ace'] <= 21:
-                hand_total += Card.CARD_VALUES['Ace']
-            else:
-                hand_total += 1
+            if hand_total > TwentyOneGame.TWENTY_ONE:
+                hand_total -= 10
 
         self.score = hand_total
 
@@ -175,36 +174,44 @@ class TwentyOneGame:
         self.display_goodbye_message()
 
     def play_round(self):
-        if self.player.score == self.TWENTY_ONE:
+        if self.handle_initial_blackjack():
+            return
+
+        self.handle_player_turn()
+
+        if not self.player.is_busted():
+            self.handle_dealer_turn()
+
+        result = self.handle_result()
+        self.display_result(result)
+
+    def handle_initial_blackjack(self):
+        if self.player.is_blackjack():
             self.show_cards()
             self.display_player_score()
             enter_to_continue()
             result = self.handle_result()
             self.display_result(result)
             sleep()
+            return True
+        return False
+
+    def handle_player_turn(self):
+        while not self.player.is_busted():
+            self.show_cards()
+            self.display_player_score()
+            action = self.player_turn()
+            if action == self.STAY:
+                break
+
+    def handle_dealer_turn(self):
+        clear_screen()
+        self.show_cards()
+        self.display_player_score()
+        if not self.dealer.is_blackjack():
+            self.dealer_turn()
         else:
-            while not self.player.is_busted():
-                self.show_cards()
-                self.display_player_score()
-                player_action = self.player_turn()
-                if player_action == self.STAY:
-                    break
-
-            if self.player.is_busted():
-                result = self.handle_result()
-                self.display_result(result)
-                sleep()
-            else:
-                clear_screen()
-                self.show_cards()
-                self.display_player_score()
-                if not self.dealer.is_blackjack():
-                    self.dealer_turn()
-                else:
-                    self.reveal_dealer_hidden()
-
-                result = self.handle_result()
-                self.display_result(result)
+            self.reveal_dealer_hidden()
 
     def deal_cards(self):
         if self.deck.is_low():
@@ -237,12 +244,12 @@ class TwentyOneGame:
         ):
             prompt(f'You were dealt {self.TWENTY_ONE}!')
             sleep()
-            return None
+            return self.STAY
 
         if self.player.score == self.TWENTY_ONE:
             prompt(f'You have {self.TWENTY_ONE}!')
             sleep()
-            return None
+            return self.STAY
 
         prompt('Hit or stay? (h/s)')
         hit_or_stay = input().strip()
@@ -273,7 +280,7 @@ class TwentyOneGame:
             clear_screen()
             prompt(f'The dealer has {self.TWENTY_ONE}!')
 
-        while self.dealer.score < 16:
+        while self.dealer.score < 17:
             clear_screen()
             self.display_player_score()
             print()
@@ -290,7 +297,7 @@ class TwentyOneGame:
             self.display_dealer_score()
             enter_to_continue()
 
-        if not self.dealer.is_busted() and self.dealer.score != 21:
+        if not self.dealer.is_busted() and self.dealer.score != self.TWENTY_ONE:
             prompt('The dealer stays')
             sleep()
 
@@ -368,9 +375,9 @@ class TwentyOneGame:
         clear_screen()
 
         if result == 'blackjack':
-            prompt('You were dealt 21! You win!')
+            prompt(f'You were dealt {self.TWENTY_ONE}! You win!')
         elif result == 'dealer_blackjack':
-            prompt('The dealer was dealt 21! The dealer wins.')
+            prompt(f'The dealer was dealt {self.TWENTY_ONE}! The dealer wins.')
         elif result == 'bust':
             prompt(f'{player_total_prompt()}{self.player.score}')
             prompt('You busted!')
