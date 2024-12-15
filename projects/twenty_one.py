@@ -11,7 +11,7 @@ def prompt(message):
 def enter_to_continue():
     input('\n(Enter to continue)')
 
-def sleep(timer=2):
+def sleep(timer=1):
     time.sleep(timer)
 
 def player_total_prompt():
