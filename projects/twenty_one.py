@@ -64,11 +64,15 @@ class Card:
 
 class Deck:
     def __init__(self):
-        self.cards = [Card(rank, suit)
+        self.cards = self.generate_deck()
+        random.shuffle(self.cards)
+
+    @staticmethod
+    def generate_deck():
+        return [Card(rank, suit)
                     for suit in Card.SUITS
                     for rank in Card.RANKS
                     ]
-        random.shuffle(self.cards)
 
     def deal(self, player, dealer):
         for _ in range(2):
@@ -79,10 +83,7 @@ class Deck:
         dealer.update_score(dealer.hand)
 
     def shuffle_deck(self):
-        self.cards = [Card(rank, suit)
-                          for suit in Card.SUITS
-                          for rank in Card.RANKS
-                          ]
+        self.cards = self.generate_deck()
         random.shuffle(self.cards)
 
     def is_low(self):
@@ -138,6 +139,8 @@ class Dealer(Participant):
 
 class TwentyOneGame:
     TWENTY_ONE = 21
+    DEALER_STAY_VALUE = 17
+
     HIT = 'hit'
     STAY = 'stay'
 
