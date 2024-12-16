@@ -140,7 +140,6 @@ class Dealer(Participant):
 class TwentyOneGame:
     TWENTY_ONE = 21
     DEALER_STAY_VALUE = 17
-
     HIT = 'hit'
     STAY = 'stay'
 
@@ -282,7 +281,7 @@ class TwentyOneGame:
             clear_screen()
             prompt(f'The dealer has {self.TWENTY_ONE}!')
 
-        while self.dealer.score < 17:
+        while self.dealer.score < self.DEALER_STAY_VALUE:
             clear_screen()
             self.display_player_score()
             print()
