@@ -70,6 +70,21 @@ class Deck:
                     ]
         random.shuffle(self.cards)
 
+    def deal(self, player, dealer):
+        for _ in range(2):
+            player.hand.append(self.cards.pop())
+            dealer.hand.append(self.cards.pop())
+
+        player.update_score(player.hand)
+        dealer.update_score(dealer.hand)
+
+    def shuffle_deck(self):
+        self.cards = [Card(rank, suit)
+                          for suit in Card.SUITS
+                          for rank in Card.RANKS
+                          ]
+        random.shuffle(self.cards)
+
     def is_low(self):
         return len(self.cards) < 20
 
@@ -117,24 +132,8 @@ class Player(Participant):
 
 
 class Dealer(Participant):
-    def __init__(self, deck):
-        self.deck = deck
+    def __init__(self):
         super().__init__()
-
-    def deal(self, player):
-        for _ in range(2):
-            player.hand.append(self.deck.cards.pop())
-            self.hand.append(self.deck.cards.pop())
-
-        player.update_score(player.hand)
-        self.update_score(self.hand)
-
-    def shuffle_deck(self):
-        self.deck.cards = [Card(rank, suit)
-                          for suit in Card.SUITS
-                          for rank in Card.RANKS
-                          ]
-        random.shuffle(self.deck.cards)
 
 
 class TwentyOneGame:
@@ -145,7 +144,7 @@ class TwentyOneGame:
     def __init__(self):
         self.deck = Deck()
         self.player = Player()
-        self.dealer = Dealer(self.deck)
+        self.dealer = Dealer()
 
     def start(self):
         self.display_welcome_message()
@@ -215,16 +214,16 @@ class TwentyOneGame:
 
     def deal_cards(self):
         if self.deck.is_low():
-            self.dealer.shuffle_deck()
+            self.deck.shuffle_deck()
             prompt('Shuffling deck.')
-            sleep(1)
+            sleep()
             clear_screen()
             prompt('Shuffling deck..')
-            sleep(1)
+            sleep()
             clear_screen()
             prompt('Shuffling deck...')
-            sleep(1)
-        self.dealer.deal(self.player)
+            sleep()
+        self.deck.deal(self.player, self.dealer)
         clear_screen()
 
     def show_cards(self):
@@ -243,12 +242,12 @@ class TwentyOneGame:
         and len(self.player.hand) == 2
         ):
             prompt(f'You were dealt {self.TWENTY_ONE}!')
-            sleep()
+            sleep(2)
             return self.STAY
 
         if self.player.score == self.TWENTY_ONE:
             prompt(f'You have {self.TWENTY_ONE}!')
-            sleep()
+            sleep(2)
             return self.STAY
 
         prompt('Hit or stay? (h/s)')
