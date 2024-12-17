@@ -90,7 +90,7 @@ class Deck:
         return len(self.cards) < 20
 
     def __repr__(self):
-        return self.cards
+        return f"Deck({[str(card) for card in self.cards]})"
 
 
 class Participant:
@@ -155,7 +155,11 @@ class TwentyOneGame:
         while True:
             clear_screen()
 
-            if 10 > self.player.money > 0:
+            if self.player.money < 1:
+                self.display_money()
+                self.comment_on_wealth()
+                break
+            elif self.player.money < 10:
                 self.deal_cards()
                 self.display_money()
                 self.play_round()
@@ -163,10 +167,6 @@ class TwentyOneGame:
                     self.reset_game()
                 else:
                     break
-            elif self.player.money < 1:
-                self.display_money()
-                self.comment_on_wealth()
-                break
             else:
                 self.display_money()
                 self.comment_on_wealth()
