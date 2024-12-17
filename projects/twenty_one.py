@@ -159,7 +159,7 @@ class TwentyOneGame:
                 self.display_money()
                 self.comment_on_wealth()
                 break
-            elif self.player.money < 10:
+            if self.player.money < 10:
                 self.deal_cards()
                 self.display_money()
                 self.play_round()
@@ -298,7 +298,9 @@ class TwentyOneGame:
             self.display_dealer_score()
             enter_to_continue()
 
-        if not self.dealer.is_busted() and self.dealer.score != self.TWENTY_ONE:
+        if (not self.dealer.is_busted()
+        and self.dealer.score != self.TWENTY_ONE
+        ):
             prompt('The dealer stays')
             sleep()
 
